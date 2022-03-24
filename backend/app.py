@@ -25,7 +25,6 @@ async def error(websocket, message):
     }
     await websocket.send(json.dumps(event))
 
-
 async def handler(websocket):
     if len(clients.keys()) >= 2 :
         error_msg = 'connection refused'
@@ -73,7 +72,7 @@ def compute_emotions():
     # msg = text, userid, timestamp
     conversation = ''
     for msg in msgs:
-        tmp = users[msg['userid']] + ': ' + msg['text'] + ',\n'
+        tmp = users[msg['userid']] + ': ' + msg['text'] + '\n'
         conversation += tmp
 
     return get_emotions(conversation)
