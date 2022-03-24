@@ -4,11 +4,11 @@ import asyncio
 import websockets
 import json
 from datetime import datetime
-from openapi_test import get_emotions
+from openapi_test2 import get_emotions
 
 users = {
-    '0' : 'A',
-    '1' : 'B'
+    '0': 'A',
+    '1': 'B'
 }
 clients = dict()
 msgs = []
@@ -25,6 +25,7 @@ async def error(websocket, message):
     }
     await websocket.send(json.dumps(event))
 
+
 async def handler(websocket):
     if len(clients.keys()) >= 2 :
         error_msg = 'connection refused'
@@ -36,9 +37,9 @@ async def handler(websocket):
         clients[id] = websocket
         while True:
             try:
-                # type : cmd, txt, 
+                # type : cmd, txt,
                 # msg = {'userid' : 1, 'type' : 'get_msgs', 'data': data}
-                message = await websocket.recv() 
+                message = await websocket.recv()
                 print(f'message : {message}')
                 json_msg = json.loads(message)
                 print(f'json msg : {json_msg}')
@@ -67,14 +68,16 @@ async def main():
     async with websockets.serve(handler, "0.0.0.0", 8002):
         await asyncio.Future()  # run forever
 
+
 def compute_emotions():
     # msg = text, userid, timestamp
     conversation = ''
-    for msg in msgs :
+    for msg in msgs:
         tmp = users[msg['userid']] + ': ' + msg['text'] + ',\n'
         conversation += tmp
 
     return get_emotions(conversation)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

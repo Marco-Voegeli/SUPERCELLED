@@ -115,17 +115,17 @@ class Conversation:
     def fromMessageToSingleWord(self, message):
         self.add_message(message)
         answers_tmp = self.get_emotions_completion()
-        print(answers_tmp)
-        answers = []
-        for answer in answers_tmp:
-            answer = answer.replace('\n', "")
-            answers.append(self.get_emotions_classification(answer))
+        # print(answers_tmp)
+        # answers = []
+        # for answer in answers_tmp:
+        #     answer = answer.replace('\n', "")
+        #     answers.append(self.get_emotions_classification(answer))
 
-        yoloDict = {
-            "A": answers[0]['label'],
-            "B": answers[1]['label'],
-        }
-        return yoloDict
+        # yoloDict = {
+        #     "A": answers[0]['label'],
+        #     "B": answers[1]['label'],
+        # }
+        return answers_tmp
 
 
 def get_emotions(conversation: str):
@@ -134,10 +134,9 @@ def get_emotions(conversation: str):
 
     c = Conversation()
 
-    final = c.fromMessageToSingleWord(
-        "A: Hey how are you ?\nB: Very good and you?\nA: I am amazed by your job yesterday !\n")
+    final = c.fromMessageToSingleWord(conversation)
     print(final)
     return final
 
 
-get_emotions("")
+# get_emotions("")
