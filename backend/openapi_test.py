@@ -1,5 +1,6 @@
 import os
 import csv
+import json
 
 from click import prompt
 import openai
@@ -23,7 +24,9 @@ B_FEEL_B = "How is B feeling in the following conversation:"
 class Conversation:
     def __init__(self) -> None:
         self.messages = []
-
+        self.yolo=openai.File.create(file=open("exampleEmotion.jsonl"), purpose="classifications") 
+        
+               
     def add_message(self, msg: str):
         self.messages.append(msg + "\n")
         
@@ -60,32 +63,19 @@ class Conversation:
 
         return resp 
 
-    def get_emotions_classification(self,preprocess_message):
+    def get_emotions_classification(self,preprocess_message):            
         swag = openai.Classification.create(
+                file=self.yolo,
                 search_model="ada",
                 model="curie",
                 query=preprocess_message,
-                examples=[
-                        ["I am sad","sad"],
-                        ["I feel awesome","happy"],
-                        ["I did not expect that","suprise"],
-                        ["It is boring","bored"],
-                        ["It really scares me","fear"],
-                        ["I want to punch someone","angry"],
-                        ["I do not understand","confused"],
-                        ["I do not want to speak about it","irritated"],
-                        ["You really disappointed me","disappointed"],
-                        ["I am exhausted","tired"],
-                        ["I am feeling frustrated","frustration"]
-                        ],
-            )
-        
+                max_examples=3,      
+        )  
         return swag
     
     def fromMessageToSingleWord(self,message):
         self.add_message(message)
         answers_tmp = self.get_emotions_completion()
-        print(answers_tmp)
         answers = []
         for answer in answers_tmp:
             answer = answer.replace('\n',"")
@@ -101,9 +91,11 @@ class Conversation:
 def get_emotions(conversation : str):
 
     openai.api_key = "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"
-
     c = Conversation()
 
-    final = c.fromMessageToSingleWord("A: Would you kindly fuck off mate?")
+    final = c.fromMessageToSingleWord(conversation)
     print(final)   
     return final 
+
+tibo = get_emotions("I don't know why, but this man told me that he wanted to eat some fries, but I am not really interested in doing that")
+#print(tibo)
