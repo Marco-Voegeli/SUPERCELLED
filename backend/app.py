@@ -8,8 +8,8 @@ import random
 from datetime import datetime
 
 users = {
-    0 : 'A',
-    1 : 'B'
+    '0' : 'A',
+    '1' : 'B'
 }
 clients = dict()
 msgs = []
@@ -38,7 +38,7 @@ async def handler(websocket):
         while True:
             try:
                 # type : cmd, txt, 
-                # msg = {'userid' : 1, 'type' : 'get_msgs', 'data': data, 'clear' 
+                # msg = {'userid' : 1, 'type' : 'get_msgs', 'data': data}
                 message = await websocket.recv() 
                 print(f'message : {message}')
                 json_msg = json.loads(message)
@@ -69,7 +69,7 @@ def compute_emotions():
     # msg = text, userid, timestamp
     result = ''
     for msg in msgs :
-        tmp = users[msg['userid']] + ' : ' + msg['text'] + '\n'
+        tmp = users[msg['userid']] + ': ' + msg['text'] + ',\n'
         result += tmp
 
     # TODO : CALL GP3T
