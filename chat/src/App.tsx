@@ -1,18 +1,7 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-
-import "./App.css";
-import gif from "./assets/happy.gif";
-
-
-import firebase from "firebase/app";
-import "firebase/firestore";
-import "firebase/auth";
-=======
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import "react-notifications-component/dist/theme.css";
-// import gif from "./assets/angry.gif";
+import gif from "./assets/angry.gif";
 import { initializeApp } from "firebase/app";
 
 import {
@@ -32,7 +21,6 @@ import {
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import axios from "axios";
 import { ReactNotifications, Store } from "react-notifications-component";
->>>>>>> 0195fe24ec27853e079cf5632ae389ee576de7c1
 
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -94,10 +82,7 @@ function ChatMessage(props: ChatMessageProps) {
       : "received";
   return (
     <div className={`message ${messageClass}`}>
-<<<<<<< HEAD
-=======
-      {/* <img src={gif} alt="loading..." /> */}
->>>>>>> 0195fe24ec27853e079cf5632ae389ee576de7c1
+      <img src={gif} alt="loading..." />
       <img src={photoURL} />
       <p>{text}</p>
       <img src={gif} alt="loading..." />
@@ -123,10 +108,10 @@ function ChatRoom() {
 
   const dummy = React.useRef<HTMLDivElement>(null);
 
-  const sendMessageToBackend = async () => {
+  const sendMessageToBackend = async (formValue: string) => {
     try {
       const resp = await axios.post("http://127.0.0.1:8000/get_emotions", {
-        text: "fuck yourself",
+        text: formValue,
       });
       console.log("GROS GROS PROUT");
       alert(JSON.stringify(resp.data));
@@ -152,7 +137,7 @@ function ChatRoom() {
     } catch (e) {
       console.log(e);
     }
-    sendMessageToBackend();
+    sendMessageToBackend(formValue);
     setFormValue("");
     dummy.current && dummy.current.scrollIntoView({ behavior: "smooth" });
   };
