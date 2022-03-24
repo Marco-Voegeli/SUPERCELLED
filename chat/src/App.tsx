@@ -1,15 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-import gif from "./assets/happy.gif";
-import firebase from "firebase/app";
-import "firebase/firestore";
-import "firebase/auth";
+import "react-notifications-component/dist/theme.css";
+// import gif from "./assets/angry.gif";
+import { initializeApp } from "firebase/app";
+
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  deleteDoc,
+  addDoc,
+  serverTimestamp,
+  where,
+  orderBy,
+  limit,
+  query,
+  onSnapshot,
+} from "firebase/firestore";
+
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import axios from "axios";
+import { ReactNotifications, Store } from "react-notifications-component";
 
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 
 import { ChatMessageProps, Message } from "./types";
-
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDf6CO6CjkVutB9QvvSqpdIDycI6VNY-_s",
@@ -21,15 +36,14 @@ const firebaseConfig = {
   measurementId: "G-QPN5ERN2JR",
 };
 
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const firestore = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 function SignIn() {
-  const signInWithGoogle = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = signInWithPopup(auth, provider);
   };
   return <button onClick={signInWithGoogle}>Sign in with Google</button>;
 }
@@ -44,16 +58,14 @@ function ClearChat() {
   return (
     auth.currentUser && (
       <button
-        onClick={() => {
-          const messagesRef = firestore.collection("messages");
-          messagesRef
-            .where("uid", "!=", "0")
-            .get()
-            .then(function (query) {
-              query.forEach(function (doc) {
-                doc.ref.delete();
-              });
-            });
+        onClick={async () => {
+          const messagesRef = collection(db, "messages");
+
+          const q = query(messagesRef, where("uid", "!=", "0"));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((queryDoc) => {
+            deleteDoc(queryDoc.ref);
+          });
         }}
       >
         Clear Chat
@@ -70,7 +82,7 @@ function ChatMessage(props: ChatMessageProps) {
       : "received";
   return (
     <div className={`message ${messageClass}`}>
-      <img src={gif} alt="loading..." />
+      {/* <img src={gif} alt="loading..." /> */}
       <img src={photoURL} />
       <p>{text}</p>
     </div>
@@ -78,15 +90,34 @@ function ChatMessage(props: ChatMessageProps) {
 }
 
 function ChatRoom() {
-  const messagesRef = firestore.collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(25);
+  const messagesRef = collection(db, "messages");
+  // const query = messagesRef.orderBy("createdAt").limit(25);
+  const q = query(messagesRef, orderBy("createdAt"), limit(25));
+  const [messages, setMessages] = useState<Message[]>([]);
 
-  const [messages]: [Message[] | undefined, boolean, Error | undefined] =
-    useCollectionData<Message>(query, { idField: "id" });
+  useEffect(() => {
+    const unsubscibe = onSnapshot(q, (querySnapshot) => {
+      const data = querySnapshot.docs.map((doc) => doc.data() as Message);
+      setMessages(data);
+    });
+    return () => unsubscibe();
+  }, []);
 
   const [formValue, setFormValue] = React.useState("");
 
   const dummy = React.useRef<HTMLDivElement>(null);
+
+  const sendMessageToBackend = async () => {
+    try {
+      const resp = await axios.post("http://127.0.0.1:8000/get_emotions", {
+        text: "fuck yourself",
+      });
+      console.log("GROS GROS PROUT");
+      alert(JSON.stringify(resp.data));
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,13 +125,18 @@ function ChatRoom() {
 
     const uid = user && user.uid;
     const photoURL = user && user.photoURL;
-    await messagesRef.add({
-      text: formValue,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid,
-      photoURL,
-    });
-
+    try {
+      const docRef = await addDoc(collection(db, "messages"), {
+        text: formValue,
+        createdAt: serverTimestamp(),
+        uid,
+        photoURL,
+      });
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.log(e);
+    }
+    sendMessageToBackend();
     setFormValue("");
     dummy.current && dummy.current.scrollIntoView({ behavior: "smooth" });
   };
@@ -127,6 +163,7 @@ function App() {
   const [user] = useAuthState(auth);
   return (
     <div className="App">
+      <ReactNotifications />
       <header className="App-header">
         <h1>Chat App</h1>
         <ClearChat />
