@@ -53,11 +53,6 @@ def get_emotions(data: textMessage):
         if value > max_value:
             max_value = value
             best_emotion = emotion
-<<<<<<< HEAD
-    return {"emotion" : best_emotion}
-
-
-=======
     return {   
             "emotion" : best_emotion,
             "value" : max_value,
@@ -70,4 +65,3 @@ def get_emotions(data: textMessage):
             "vaderSentiment": vs,
             "emotions": emotions
             }
->>>>>>> 0195fe24ec27853e079cf5632ae389ee576de7c1
