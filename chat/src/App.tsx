@@ -85,6 +85,7 @@ function ChatMessage(props: ChatMessageProps) {
       <img src={gif} alt="loading..." />
       <img src={photoURL} />
       <p>{text}</p>
+      <img src={gif} alt="loading..." />
     </div>
   );
 }
@@ -173,5 +174,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;
