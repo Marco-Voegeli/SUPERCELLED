@@ -6,6 +6,8 @@ import json
 from profanity_check import predict
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
 
 
 class textMessage(BaseModel):
@@ -38,9 +40,11 @@ def get_emotions(data: textMessage):
     naiveBayesP_pos = naiveBayesBlob.sentiment.p_pos
     naiveBayesP_neg = naiveBayesBlob.sentiment.p_neg
 
-
     polarity = blob.sentiment.polarity
     subjectivity = blob.sentiment.subjectivity
+
+    analyzer = SentimentIntensityAnalyzer()
+    vs = analyzer.polarity_scores(text)
 
     max_value = 0
     best_emotion = ''
@@ -58,5 +62,6 @@ def get_emotions(data: textMessage):
             "naiveBayesClassification": naiveBayesClassification,
             "naiveBayesP_pos": naiveBayesP_pos,
             "naiveBayesP_neg": naiveBayesP_neg,
+            "vaderSentiment": vs,
             "emotions": emotions
             }
