@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI, UploadFile, File, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 import text2emotion as te
@@ -8,10 +9,11 @@ from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-
-
 class textMessage(BaseModel):
     text: str
+
+class Conversation(BaseModel):
+    text: List[dict]
 
 app = FastAPI(
     title="Our Python Backend",
@@ -54,8 +56,6 @@ def get_emotions(data: textMessage):
             max_value = value
             best_emotion = emotion
     return {   
-            "emotion" : best_emotion,
-            "value" : max_value,
             "profanity" : profanity,
             "polarity": polarity,
             "subjectivity": subjectivity,
@@ -63,5 +63,12 @@ def get_emotions(data: textMessage):
             "naiveBayesP_pos": naiveBayesP_pos,
             "naiveBayesP_neg": naiveBayesP_neg,
             "vaderSentiment": vs,
+            "emotion" : best_emotion,
+            "value" : max_value,
             "emotions": emotions
             }
+
+@app.post("/get_convo")
+def get_convo(data: Conversation):
+    print("get conversation")
+    print(f'data : {data}')
