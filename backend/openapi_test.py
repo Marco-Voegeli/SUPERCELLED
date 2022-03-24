@@ -85,7 +85,6 @@ class Conversation:
     def fromMessageToSingleWord(self,message):
         self.add_message(message)
         answers_tmp = self.get_emotions_completion()
-        print(answers_tmp)
         answers = []
         for answer in answers_tmp:
             answer = answer.replace('\n',"")
@@ -104,6 +103,6 @@ def get_emotions(conversation : str):
 
     c = Conversation()
 
-    final = c.fromMessageToSingleWord("A: Would you kindly fuck off mate?")
-    print(final)   
+    final = c.fromMessageToSingleWord(conversation)
+    #print(final)   
     return final 
