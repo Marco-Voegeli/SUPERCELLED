@@ -112,6 +112,7 @@ function ChatRoom() {
     try {
       const resp = await axios.post("http://127.0.0.1:8000/get_emotions", {
         text: formValue,
+        
       });
       console.log("GROS GROS PROUT");
       alert(JSON.stringify(resp.data));
@@ -120,12 +121,31 @@ function ChatRoom() {
     }
   };
 
+  const sendConvoToBackend = async() => {
+    try {
+      const conversation = messages.map((msg) => {
+        return {
+          'key': msg.id,
+          'message': msg.text
+        }
+      });
+      const resp = await axios.post("http://127.0.0.1:8000/get_convo", {
+        text: conversation,
+      });
+      console.log("GROS GROS PROUT");
+      alert(JSON.stringify(resp.data));
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = auth && auth.currentUser && auth.currentUser;
 
     const uid = user && user.uid;
     const photoURL = user && user.photoURL;
+
     try {
       const docRef = await addDoc(collection(db, "messages"), {
         text: formValue,
@@ -137,7 +157,9 @@ function ChatRoom() {
     } catch (e) {
       console.log(e);
     }
+
     sendMessageToBackend(formValue);
+    sendConvoToBackend();
     setFormValue("");
     dummy.current && dummy.current.scrollIntoView({ behavior: "smooth" });
   };
