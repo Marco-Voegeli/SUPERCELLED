@@ -98,11 +98,12 @@ class Conversation:
         return yoloDict
         
  
+def get_emotions(conversation : str):
 
+    openai.api_key = "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"
 
-openai.api_key = "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"
+    c = Conversation()
 
-c = Conversation()
-
-final = c.fromMessageToSingleWord("A: Would you kindly fuck off mate?")
-print(final)   
+    final = c.fromMessageToSingleWord("A: Would you kindly fuck off mate?")
+    print(final)   
+    return final 
