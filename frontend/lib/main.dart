@@ -8,6 +8,9 @@ void main() {
   runApp(const MyApp());
 }
 
+const equi = {"0": "A", "1": "B"};
+const other_equi = {"0": "B", "1": "A"};
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -34,15 +37,14 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late HtmlWebSocketChannel channel;
-  bool connected = false;
+  int connected = 0;
   String myId = "";
-
+  String otherUserEmotion = "";
   List<MessageData> msgList = [];
   TextEditingController msgtext = TextEditingController();
 
   @override
   void initState() {
-    connected = false;
     msgtext.text = "";
     channelconnect();
     super.initState();
@@ -54,43 +56,50 @@ class _ChatPageState extends State<ChatPage> {
       channel = HtmlWebSocketChannel.connect(Uri.parse('ws://10.15.7.28:8002'));
       channel.stream.listen(
         (message) {
-          print(message);
-          setState(() {
+          try {
             if (message.toString().startsWith("connected")) {
-              connected = true;
+              connected = 1;
               myId = message.toString().split(" ")[1];
               setState(() {});
               print("Connection establised.");
               sendmsg("get_conv", myId, "cmd");
             } else {
-              print("Message data");
+              // print("Message data");
               // message = message.replaceAll(RegExp("'"), '"');
               var jsondata = json.decode(message);
-
-              var messages = jsondata["msgs"] as List<dynamic>;
-              msgList = messages
-                  .map((msg) => MessageData(
-                      text: msg['text'],
-                      userid: msg["userid"],
-                      timestamp: msg["userid"]))
-                  .toList();
-              var otherUserEmotion = jsondata["emotions"];
-              setState(() {
-                //update UI after adding data to message model
-              });
+              if (jsondata["msgs"] != null) {
+                var messages = jsondata["msgs"] as List<dynamic>;
+                print("Received messages " + messages.length.toString());
+                msgList = messages
+                    .map((msg) => MessageData(
+                        text: msg['text'],
+                        userid: msg["userid"],
+                        timestamp: msg["userid"]))
+                    .toList();
+                setState(() {});
+              } else if (jsondata["emotions"] != null) {
+                print("Received emotions: " + jsondata["emotions"].toString());
+                otherUserEmotion = jsondata["emotions"][other_equi[myId]];
+                setState(() {});
+              }
             }
-          });
+          } catch (e) {
+            print(e);
+          }
+          //update UI after adding data to message model
         },
         onDone: () {
           //if WebSocket is disconnected
           print("Web socket is closed");
           setState(() {
-            connected = false;
+            // connected = false;
           });
         },
         onError: (error) {
+          print("The error is here");
           print(error.toString());
         },
+        cancelOnError: true,
       );
     } catch (e) {
       print(e);
@@ -99,27 +108,33 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> sendmsg(String sendmsg, String id, String typ) async {
-    if (connected == true) {
+    if (connected == 1) {
       String msg = json.encode({'userid': id, 'data': sendmsg, 'type': typ});
       setState(() {
         msgtext.text = "";
       });
       channel.sink.add(msg); //send message to reciever channel
-    } else {
+    } else if (connected == 0) {
       channelconnect();
       print("Websocket is not connected.");
-    }
+    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Group Chat"),
+        actions: [
+          IconButton(
+            onPressed: () => sendmsg("clear", myId, "cmd"),
+            icon: const Icon(Icons.restore_outlined),
+          ),
+        ],
       ),
-      body: connected
-          ? Container(
-              child: Stack(
+      body: connected == 1
+          ? Stack(
               children: [
                 Positioned(
                     top: 0,
@@ -127,97 +142,122 @@ class _ChatPageState extends State<ChatPage> {
                     left: 0,
                     right: 0,
                     child: Container(
-                        padding: EdgeInsets.all(15),
+                        padding: const EdgeInsets.all(15),
                         child: SingleChildScrollView(
                             child: Column(
                           children: [
-                            Container(
-                              child: Text("Your Messages",
-                                  style: TextStyle(fontSize: 20)),
+                            Text("You are user " + (equi[myId] ?? "undef"),
+                                style: const TextStyle(fontSize: 20)),
+                            Column(
+                              children: [
+                                Text("User " +
+                                    (other_equi[myId] ?? "undef") +
+                                    " is feeling " +
+                                    otherUserEmotion),
+                                ...msgList.map(
+                                  (onemsg) {
+                                    var isMe = onemsg.userid == myId;
+                                    return Container(
+                                      padding: EdgeInsets.only(
+                                        //if is my message, then it has margin 40 at left
+                                        left: isMe ? size.width * 0.4 : 0,
+                                        right: isMe
+                                            ? 0
+                                            : size.width *
+                                                0.4, //else margin at right
+                                      ),
+                                      child: Card(
+                                        color: isMe
+                                            ? Colors.blue[100]
+                                            : Colors.red[100],
+                                        //if its my message then, blue background else red background
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.60,
+                                          padding: const EdgeInsets.all(15),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(isMe
+                                                  ? "ID: ME"
+                                                  : "ID: " + onemsg.userid),
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    top: 10, bottom: 10),
+                                                child: Text(
+                                                    "Message: " + onemsg.text,
+                                                    style: const TextStyle(
+                                                        fontSize: 17)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ).toList()
+                              ],
                             ),
-                            Container(
-                                child: Column(
-                                    // children: []msglist.map((onemsg){
-                                    //   return Container(
-                                    //      margin: EdgeInsets.only( //if is my message, then it has margin 40 at left
-                                    //              left: onemsg.isme?40:0,
-                                    //              right: onemsg.isme?0:40, //else margin at right
-                                    //           ),
-                                    //      child: Card(
-                                    //         color: onemsg.isme?Colors.blue[100]:Colors.red[100],
-                                    //         //if its my message then, blue background else red background
-                                    //         child: Container(
-                                    //           width: double.infinity,
-                                    //           padding: EdgeInsets.all(15),
-
-                                    //           child: Column(
-                                    //             crossAxisAlignment: CrossAxisAlignment.start,
-                                    //             children: [
-
-                                    //               Container(
-                                    //                 child:Text(onemsg.isme?"ID: ME":"ID: " + onemsg.userid)
-                                    //               ),
-
-                                    //               Container(
-                                    //                  margin: EdgeInsets.only(top:10,bottom:10),
-                                    //                  child: Text("Message: " + onemsg.msgtext, style: TextStyle(fontSize: 17)),
-                                    //               ),
-
-                                    //             ],),
-                                    //         )
-                                    //      )
-                                    //   );
-                                    // }).toList(),
-                                    ))
                           ],
                         )))),
                 Positioned(
                   //position text field at bottom of screen
-
                   bottom: 0, left: 0, right: 0,
                   child: Container(
-                      color: Colors.black12,
-                      height: 70,
-                      child: Row(
-                        children: [
-                          Expanded(
-                              child: Container(
-                            margin: EdgeInsets.all(10),
-                            child: TextField(
-                              controller: msgtext,
-                              decoration: InputDecoration(
-                                  hintText: "Enter your Message"),
-                            ),
-                          )),
-                          Container(
-                              margin: EdgeInsets.all(10),
-                              child: ElevatedButton(
-                                child: Icon(Icons.send),
-                                onPressed: () {
-                                  if (msgtext.text != "") {
-                                    // sendmsg(msgtext.text, recieverid); //send message with webspcket
-                                  } else {
-                                    print("Enter message");
-                                  }
-                                },
-                              ))
-                        ],
-                      )),
-                )
-              ],
-            ))
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Text(
-                    'prout',
-                    style: Theme.of(context).textTheme.headline4,
+                    color: Colors.black12,
+                    height: 70,
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Container(
+                          margin: const EdgeInsets.all(10),
+                          child: TextField(
+                            onSubmitted: (value) => sendmsg(value, myId, "txt"),
+                            controller: msgtext,
+                            decoration: const InputDecoration(
+                                hintText: "Enter your Message"),
+                          ),
+                        )),
+                        Container(
+                          margin: const EdgeInsets.all(10),
+                          child: ElevatedButton(
+                            child: const Icon(Icons.send),
+                            onPressed: () {
+                              if (msgtext.text != "") {
+                                sendmsg(msgtext.text, myId, "txt");
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  TextButton(onPressed: channelconnect, child: Text("connect"))
-                ],
-              ),
-            ),
+                ),
+              ],
+            )
+          : (connected == 0
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      const CircularProgressIndicator(),
+                      TextButton(
+                          onPressed: channelconnect,
+                          child: const Text("connect"))
+                    ],
+                  ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: const <Widget>[
+                      Text("Error while parsing message")
+                    ],
+                  ),
+                )),
     );
   }
 }
