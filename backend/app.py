@@ -6,6 +6,7 @@ import websockets
 import json
 import random
 from datetime import datetime
+from openapi_test import get_emotions
 
 users = {
     '0' : 'A',
@@ -67,14 +68,14 @@ async def main():
 
 def compute_emotions():
     # msg = text, userid, timestamp
-    result = ''
+    conversation = ''
     for msg in msgs :
         tmp = users[msg['userid']] + ': ' + msg['text'] + ',\n'
-        result += tmp
+        conversation += tmp
 
     # TODO : CALL GP3T
-    print(f'result : {result}')
-    return result
+    print(f'conversation : {conversation}')
+    return get_emotions(conversation)
 
 if __name__ == "__main__":
     asyncio.run(main())
