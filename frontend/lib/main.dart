@@ -53,7 +53,7 @@ class _ChatPageState extends State<ChatPage> {
   channelconnect() {
     //function to connect
     try {
-      channel = HtmlWebSocketChannel.connect(Uri.parse('ws://10.15.7.28:8002'));
+      channel = HtmlWebSocketChannel.connect(Uri.parse('ws://localhost:8002'));
       channel.stream.listen(
         (message) {
           try {
