@@ -1,6 +1,28 @@
 import os
 import csv
-import json
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.optimizers import Adam
+
+
+from sklearn.preprocessing import LabelEncoder
+
+import re 
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+from tensorflow.keras.preprocessing.text import one_hot
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+nltk.download('stopwords')
+stopwords = set(nltk.corpus.stopwords.words('english'))
+
+
+
 
 from click import prompt
 import openai
@@ -97,5 +119,7 @@ def get_emotions(conversation : str):
     print(final)   
     return final 
 
-tibo = get_emotions("I don't know why, but this man told me that he wanted to eat some fries, but I am not really interested in doing that")
+#tibo = get_emotions("I don't know why, but this man told me that he wanted to eat some fries, but I am not really interested in doing that")
 #print(tibo)
+
+
