@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 import text2emotion as te
 from pydantic import BaseModel
+import json
 
 class textMessage(BaseModel):
     text: str
@@ -20,11 +21,12 @@ app.add_middleware(
 
 @app.post("/get_emotions")
 def get_emotions(data: textMessage):
-    print("prout")
     text = data.text
-    return te.get_emotion(text)
-
-text = "I want to break free"
-emotions = te.get_emotion(text)
-
-print(emotions)
+    emotions = te.get_emotion(text)
+    max_value = 0
+    best_emotion = ''
+    for emotion in emotions:
+        value = emotions[emotion]
+        if value > max_value:
+            best_emotion = emotion
+    return {"emotion" : best_emotion}
