@@ -91,7 +91,11 @@ class Conversation:
             answer = answer.replace('\n',"")
             answers.append(self.get_emotions_classification(answer))
         
-        return answers
+        yoloDict = {
+            "A": answers[0]['label'],
+            "B": answers[1]['label'],
+        }  
+        return yoloDict
         
  
 
@@ -101,7 +105,4 @@ openai.api_key = "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"
 c = Conversation()
 
 final = c.fromMessageToSingleWord("A: Would you kindly fuck off mate?")
-
-print()
-for tibo in final:
-    print(tibo['label'])    
+print(final)   
