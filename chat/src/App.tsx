@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+
 import "./App.css";
 import gif from "./assets/happy.gif";
+
+
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
@@ -70,9 +73,9 @@ function ChatMessage(props: ChatMessageProps) {
       : "received";
   return (
     <div className={`message ${messageClass}`}>
-      <img src={gif} alt="loading..." />
       <img src={photoURL} />
       <p>{text}</p>
+      <img src={gif} alt="loading..." />
     </div>
   );
 }
@@ -136,5 +139,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;

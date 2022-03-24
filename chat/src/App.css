@@ -140,15 +140,23 @@ p {
   color: white;
   background: #0b93f6;
   align-self: flex-end;
+  overflow: scroll;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 .received p {
   background: #e5e5ea;
   color: black;
+  overflow: scroll;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 img {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   margin: 2px 5px;
 }

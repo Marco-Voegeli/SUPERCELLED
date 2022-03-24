@@ -30,3 +30,5 @@ def get_emotions(data: textMessage):
         if value > max_value:
             best_emotion = emotion
     return {"emotion" : best_emotion}
+
+
