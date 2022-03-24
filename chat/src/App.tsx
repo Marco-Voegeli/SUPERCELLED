@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import "react-notifications-component/dist/theme.css";
-// import gif from "./assets/angry.gif";
+import gif from "./assets/angry.gif";
 import { initializeApp } from "firebase/app";
 
 import {
@@ -82,7 +82,7 @@ function ChatMessage(props: ChatMessageProps) {
       : "received";
   return (
     <div className={`message ${messageClass}`}>
-      {/* <img src={gif} alt="loading..." /> */}
+      <img src={gif} alt="loading..." />
       <img src={photoURL} />
       <p>{text}</p>
     </div>
@@ -107,10 +107,10 @@ function ChatRoom() {
 
   const dummy = React.useRef<HTMLDivElement>(null);
 
-  const sendMessageToBackend = async () => {
+  const sendMessageToBackend = async (formValue: string) => {
     try {
       const resp = await axios.post("http://127.0.0.1:8000/get_emotions", {
-        text: "fuck yourself",
+        text: formValue,
       });
       console.log("GROS GROS PROUT");
       alert(JSON.stringify(resp.data));
@@ -136,7 +136,7 @@ function ChatRoom() {
     } catch (e) {
       console.log(e);
     }
-    sendMessageToBackend();
+    sendMessageToBackend(formValue);
     setFormValue("");
     dummy.current && dummy.current.scrollIntoView({ behavior: "smooth" });
   };
