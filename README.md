@@ -1,3 +1,3 @@
 # SUPERCELLED
 
-Bringing nonverbal communication to the virtual world
+Bringing non verbal communication to the virtual world
