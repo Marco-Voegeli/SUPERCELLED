@@ -130,7 +130,7 @@ class Conversation:
 
 def get_emotions(conversation: str):
 
-    openai.api_key = "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"
+    openai.api_key = "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"
 
     c = Conversation()
 
