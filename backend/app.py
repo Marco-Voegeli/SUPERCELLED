@@ -13,6 +13,7 @@ users = {
 clients = dict()
 msgs = []
 
+
 async def error(websocket, message):
     print(message)
     """
@@ -25,11 +26,12 @@ async def error(websocket, message):
     }
     await websocket.send(json.dumps(event))
 
+
 async def handler(websocket):
-    if len(clients.keys()) >= 2 :
+    if len(clients.keys()) >= 2:
         error_msg = 'connection refused'
         await error(websocket, error_msg)
-    else :
+    else:
         id = len(clients.keys())
         await websocket.send(f"connected {id}")
         print("User " + users[str(id)] + " connected")
@@ -47,9 +49,9 @@ async def handler(websocket):
                         msgs.clear()
                     await send_msgs()
                 elif json_msg['type'] == 'txt':
-                    msgs.append({"text" :json_msg['data'], "userid" :json_msg['userid'], "timestamp": datetime.now().strftime("%H:%M:%S")})
+                    msgs.append({"text": json_msg['data'], "userid": json_msg['userid'], "timestamp": datetime.now(
+                    ).strftime("%H:%M:%S")})
                     await send_msgs()
-
 
             except websockets.ConnectionClosedOK:
                 print("User " + users[str(id)] + " disconnected")
@@ -57,11 +59,13 @@ async def handler(websocket):
                 clients.pop(id)
                 break
 
+
 async def send_msgs():
-    for id in clients :
-        await clients[id].send(json.dumps({"msgs" : msgs }))
-    for id in clients :
+    for id in clients:
+        await clients[id].send(json.dumps({"msgs": msgs}))
+    for id in clients:
         await clients[id].send(json.dumps({"emotions": compute_emotions()}))
+
 
 async def main():
     async with websockets.serve(handler, "0.0.0.0", 8002):
@@ -75,7 +79,8 @@ def compute_emotions():
         tmp = users[msg['userid']] + ': ' + msg['text'] + '\n'
         conversation += tmp
 
-    return get_emotions(conversation)
+    # return get_emotions(conversation)
+    return json.dumps({"A": "A's feeling happy", "B": "B's feeling happy"})
 
 
 if __name__ == "__main__":
