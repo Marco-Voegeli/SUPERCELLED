@@ -1,5 +1,28 @@
 import os
 import csv
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.optimizers import Adam
+
+
+from sklearn.preprocessing import LabelEncoder
+
+import re 
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+from tensorflow.keras.preprocessing.text import one_hot
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+nltk.download('stopwords')
+stopwords = set(nltk.corpus.stopwords.words('english'))
+
+
+
 
 from click import prompt
 import openai
@@ -23,7 +46,9 @@ B_FEEL_B = "How is B feeling in the following conversation:"
 class Conversation:
     def __init__(self) -> None:
         self.messages = []
-
+        self.yolo=openai.File.create(file=open("exampleEmotion.jsonl"), purpose="classifications") 
+        
+               
     def add_message(self, msg: str):
         self.messages.append(msg + "\n")
         
@@ -60,26 +85,14 @@ class Conversation:
 
         return resp 
 
-    def get_emotions_classification(self,preprocess_message):
+    def get_emotions_classification(self,preprocess_message):            
         swag = openai.Classification.create(
+                file=self.yolo,
                 search_model="ada",
                 model="curie",
                 query=preprocess_message,
-                examples=[
-                        ["I am sad","sad"],
-                        ["I feel awesome","happy"],
-                        ["I did not expect that","suprise"],
-                        ["It is boring","bored"],
-                        ["It really scares me","fear"],
-                        ["I want to punch someone","angry"],
-                        ["I do not understand","confused"],
-                        ["I do not want to speak about it","irritated"],
-                        ["You really disappointed me","disappointed"],
-                        ["I am exhausted","tired"],
-                        ["I am feeling frustrated","frustration"]
-                        ],
-            )
-        
+                max_examples=3,      
+        )  
         return swag
     
     def fromMessageToSingleWord(self,message):
@@ -100,9 +113,13 @@ class Conversation:
 def get_emotions(conversation : str):
 
     openai.api_key = "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"
-
     c = Conversation()
 
     final = c.fromMessageToSingleWord(conversation)
-    #print(final)   
+    print(final)   
     return final 
+
+#tibo = get_emotions("I don't know why, but this man told me that he wanted to eat some fries, but I am not really interested in doing that")
+#print(tibo)
+
+
