@@ -107,7 +107,10 @@ def get_GIF_url(feeling):
     #coucou = json.dumps(data, sort_keys=True, indent=4)
     coucou = data['data']
     first = coucou[0]
-    url = first['embed_url']
+
+    id = first['id']
+    url = 'https://i.giphy.com/media/' + id +'/giphy.webp'
+    print(f'url : {url}')
     return url
 
 
