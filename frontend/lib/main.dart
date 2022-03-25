@@ -223,6 +223,7 @@ class _ChatPageState extends State<ChatPage> {
                                 children: [
                                   gif_url != ""
                                       ? Container(
+                                          // clipBehavior: ,
                                           width: size.width * 0.2,
                                           child: Image.network(gif_url))
                                       : const SizedBox.shrink(),
