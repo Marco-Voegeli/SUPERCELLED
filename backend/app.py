@@ -89,25 +89,26 @@ async def main():
 
 
 def get_GIF_url(feeling):
-    f = open('URL_GIFs.json')
-    url_gifs = json.load(f)
-    if feeling in url_gifs.keys():
-        return url_gifs[feeling]
-    else :
-        params = parse.urlencode({
-        "q": feeling,
-        "api_key": GIPHY_API_KEY,
-        "limit": "1"
-        })
+    
+    #f = open('URL_GIFs.json')
+    #url_gifs = json.load(f)
+    #if feeling in url_gifs.keys():
+    #    return url_gifs[feeling]
+    #else :
+    params = parse.urlencode({
+    "q": feeling,
+    "api_key": GIPHY_API_KEY,
+    "limit": "1"
+    })
 
-        with request.urlopen("".join((GIPHY_URL, "?", params))) as response:
-            data = json.loads(response.read())
+    with request.urlopen("".join((GIPHY_URL, "?", params))) as response:
+        data = json.loads(response.read())
 
-        #coucou = json.dumps(data, sort_keys=True, indent=4)
-        coucou = data['data']
-        first = coucou[0]
-        url = first['url']
-        return url
+    #coucou = json.dumps(data, sort_keys=True, indent=4)
+    coucou = data['data']
+    first = coucou[0]
+    url = first['embed_url']
+    return url
 
 
 def compute_emotions():
