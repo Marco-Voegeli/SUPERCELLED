@@ -105,9 +105,7 @@ def compute_emotions():
         tmp = users[msg['userid']] + ': ' + msg['text'] + '\n'
         conversation += tmp
 
-    # return get_emotions(conversation)
-    return json.dumps({"A": "A's feeling happy", "B": "B's feeling happy"})
-
+    return get_emotions(conversation)
 
 if __name__ == "__main__":
     asyncio.run(main())
