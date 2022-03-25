@@ -6,7 +6,6 @@ Bringing non verbal communication to the virtual world
 **Empathy** is missing in the virtual world
 - Nowaday people are strongly connected but emotionally distant
 - We looked at a more specific case of chat room
-- 
 
 # CHATMO
 
