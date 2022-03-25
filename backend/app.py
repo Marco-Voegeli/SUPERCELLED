@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from openapi_test2 import get_emotions
 from urllib import parse, request
+import random
 
 users = {
     '0': 'A',
@@ -105,9 +106,9 @@ def get_GIF_url(feeling):
         data = json.loads(response.read())
 
     #coucou = json.dumps(data, sort_keys=True, indent=4)
+    rdm_gif = random.randint(0, 9)
     coucou = data['data']
-    first = coucou[0]
-
+    first = coucou[rdm_gif]
     id = first['id']
     url = 'https://i.giphy.com/media/' + id +'/giphy.webp'
     print(f'url : {url}')
