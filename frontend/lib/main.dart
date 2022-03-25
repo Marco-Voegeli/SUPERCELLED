@@ -92,12 +92,15 @@ class _ChatPageState extends State<ChatPage> {
                         userid: msg["userid"],
                         timestamp: msg["userid"]))
                     .toList();
+                waitingForModel = true;
                 setState(() {});
               } else if (jsondata["emotions"] != null) {
                 print("Received emotions: " + jsondata["emotions"].toString());
                 rawModelData = jsondata["emotions"].toString();
                 waitingForModel = false;
-                otherUserEmotion = jsondata["emotions"][other_equi[myId]];
+                String tmp =
+                    json.decode(jsondata["emotions"])[other_equi[myId]];
+                otherUserEmotion = tmp.split(" ").last;
                 setState(() {});
               }
             }
@@ -172,8 +175,18 @@ class _ChatPageState extends State<ChatPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
-                                const Text("Raw data of the assistant :"),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 30),
+                                  child: Text(
+                                    "Raw data of the assistant :",
+                                    style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                                 waitingForModel
                                     ? const SizedBox(
                                         width: 100,
