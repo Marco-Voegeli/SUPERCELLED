@@ -161,6 +161,14 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.send),
+        onPressed: () {
+          if (msgtext.text != "") {
+            sendmsg(msgtext.text, myId, "txt");
+          }
+        },
+      ),
       body: connected == 1
           ? Column(
               children: [
@@ -179,22 +187,26 @@ class _ChatPageState extends State<ChatPage> {
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                 const Padding(
-                                  padding: EdgeInsets.only(bottom: 30),
+                                  padding: EdgeInsets.only(bottom: 20),
                                   child: Text(
                                     "Raw data of the assistant :",
                                     style: TextStyle(
-                                        fontSize: 17,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 waitingForModel
-                                    ? const SizedBox(
-                                        width: 100,
-                                        height: 100,
-                                        child: LoadingIndicator(
-                                          indicatorType: Indicator.pacman,
-                                          colors: _kDefaultRainbowColors,
-                                          strokeWidth: 4.0,
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: SizedBox(
+                                          width: 80,
+                                          height: 80,
+                                          child: LoadingIndicator(
+                                            indicatorType: Indicator
+                                                .ballTrianglePathColoredFilled,
+                                            colors: _kDefaultRainbowColors,
+                                            strokeWidth: 4.0,
+                                          ),
                                         ),
                                       )
                                     : Text(rawModelData)
@@ -286,43 +298,37 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 Expanded(
-                  flex: 1,
-                  //position text field at bottom of screen
-                  // bottom: 0, left: 0, right: 0,
-                  child: Container(
-                    color: Colors.black12,
-                    height: 70,
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: Container(
-                          margin: const EdgeInsets.all(10),
-                          child: TextField(
-                            autofocus: true,
-                            focusNode: myFocusNode,
-                            onSubmitted: (value) {
-                              sendmsg(value, myId, "txt");
-                              msgtext.clear();
-                              myFocusNode.requestFocus();
-                            },
-                            controller: msgtext,
-                            decoration: const InputDecoration(
-                                hintText: "Enter your Message"),
-                          ),
-                        )),
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          child: ElevatedButton(
-                            child: const Icon(Icons.send),
-                            onPressed: () {
-                              if (msgtext.text != "") {
-                                sendmsg(msgtext.text, myId, "txt");
-                              }
-                            },
+                  flex: 2,
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Container(
+                        decoration: const BoxDecoration(
+                            // border: Border.all(color: Colors.black, ),
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            color: Color.fromARGB(255, 211, 211, 211)),
+                        margin: const EdgeInsets.only(
+                            bottom: 0, right: 40, left: 10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Container(
+                            height: 50,
+                            child: TextField(
+                              autofocus: true,
+                              focusNode: myFocusNode,
+                              onSubmitted: (value) {
+                                sendmsg(value, myId, "txt");
+                                msgtext.clear();
+                                myFocusNode.requestFocus();
+                              },
+                              controller: msgtext,
+                              decoration: const InputDecoration.collapsed(
+                                  hintText: "Enter your Message"),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ))
+                    ],
                   ),
                 ),
               ],
