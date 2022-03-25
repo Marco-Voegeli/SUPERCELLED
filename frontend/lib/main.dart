@@ -2,12 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/html.dart';
-import 'package:web_socket_channel/io.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
+const List<Color> _kDefaultRainbowColors = [
+  Colors.red,
+  Colors.orange,
+  Colors.yellow,
+  Colors.green,
+  Colors.blue,
+  Colors.indigo,
+  Colors.purple,
+];
 const equi = {"0": "A", "1": "B"};
 const other_equi = {"0": "B", "1": "A"};
 
@@ -42,12 +51,19 @@ class _ChatPageState extends State<ChatPage> {
   String otherUserEmotion = "";
   List<MessageData> msgList = [];
   TextEditingController msgtext = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late FocusNode myFocusNode;
+  bool waitingForModel = true;
+  String rawModelData = "";
 
   @override
   void initState() {
     msgtext.text = "";
+    myFocusNode = FocusNode();
     channelconnect();
     super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback((_) =>
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
   }
 
   channelconnect() {
@@ -79,6 +95,8 @@ class _ChatPageState extends State<ChatPage> {
                 setState(() {});
               } else if (jsondata["emotions"] != null) {
                 print("Received emotions: " + jsondata["emotions"].toString());
+                rawModelData = jsondata["emotions"].toString();
+                waitingForModel = false;
                 otherUserEmotion = jsondata["emotions"][other_equi[myId]];
                 setState(() {});
               }
@@ -113,7 +131,10 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         msgtext.text = "";
       });
-      channel.sink.add(msg); //send message to reciever channel
+      waitingForModel = true;
+      channel.sink.add(msg);
+      //send message to reciever channel
+      setState(() {});
     } else if (connected == 0) {
       channelconnect();
       print("Websocket is not connected.");
@@ -125,7 +146,11 @@ class _ChatPageState extends State<ChatPage> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Group Chat"),
+        title: Text(
+          "Group Chat" +
+              (equi[myId] == null ? "" : " - User " + (equi[myId] ?? "")),
+          style: const TextStyle(fontSize: 20),
+        ),
         actions: [
           IconButton(
             onPressed: () => sendmsg("clear", myId, "cmd"),
@@ -134,78 +159,123 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
       body: connected == 1
-          ? Stack(
+          ? Column(
               children: [
-                Positioned(
-                    top: 0,
-                    bottom: 70,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                        padding: const EdgeInsets.all(15),
-                        child: SingleChildScrollView(
-                            child: Column(
+                Expanded(
+                  flex: 12,
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text("You are user " + (equi[myId] ?? "undef"),
-                                style: const TextStyle(fontSize: 20)),
                             Column(
                               children: [
+                                const Text("Raw data of the assistant :"),
+                                waitingForModel
+                                    ? const SizedBox(
+                                        width: 100,
+                                        height: 100,
+                                        child: LoadingIndicator(
+                                          indicatorType: Indicator.pacman,
+                                          colors: _kDefaultRainbowColors,
+                                          strokeWidth: 4.0,
+                                        ),
+                                      )
+                                    : Text(rawModelData)
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(50))),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
                                 Text("User " +
                                     (other_equi[myId] ?? "undef") +
                                     " is feeling " +
                                     otherUserEmotion),
-                                ...msgList.map(
-                                  (onemsg) {
-                                    var isMe = onemsg.userid == myId;
-                                    return Container(
-                                      padding: EdgeInsets.only(
-                                        //if is my message, then it has margin 40 at left
-                                        left: isMe ? size.width * 0.4 : 0,
-                                        right: isMe
-                                            ? 0
-                                            : size.width *
-                                                0.4, //else margin at right
-                                      ),
-                                      child: Card(
-                                        color: isMe
-                                            ? Colors.blue[100]
-                                            : Colors.red[100],
-                                        //if its my message then, blue background else red background
-                                        child: Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.60,
-                                          padding: const EdgeInsets.all(15),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(isMe
-                                                  ? "ID: ME"
-                                                  : "ID: " + onemsg.userid),
-                                              Container(
-                                                margin: const EdgeInsets.only(
-                                                    top: 10, bottom: 10),
-                                                child: Text(
-                                                    "Message: " + onemsg.text,
-                                                    style: const TextStyle(
-                                                        fontSize: 17)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ).toList()
                               ],
                             ),
                           ],
-                        )))),
-                Positioned(
+                        ),
+                        const Divider(
+                          color: Colors.grey,
+                          thickness: 2,
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            controller: _scrollController,
+                            itemCount: msgList.length,
+                            itemBuilder: (context, idx) {
+                              if (idx == msgList.length - 1) {
+                                Future.delayed(
+                                    const Duration(milliseconds: 100),
+                                    () => _scrollController.animateTo(
+                                        _scrollController
+                                            .position.maxScrollExtent,
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        curve: Curves.easeIn));
+                              }
+                              final onemsg = msgList[idx];
+                              var isMe = onemsg.userid == myId;
+                              return Container(
+                                padding: EdgeInsets.only(
+                                  //if is my message, then it has margin 40 at left
+                                  left: isMe ? size.width * 0.4 : 0,
+                                  right: isMe
+                                      ? 0
+                                      : size.width * 0.4, //else margin at right
+                                ),
+                                child: Card(
+                                  color:
+                                      isMe ? Colors.blue[100] : Colors.red[100],
+                                  //if its my message then, blue background else red background
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.60,
+                                    padding: const EdgeInsets.all(15),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(isMe
+                                            ? "ID: ME"
+                                            : "ID: " + onemsg.userid),
+                                        Container(
+                                          margin: const EdgeInsets.only(
+                                              top: 10, bottom: 10),
+                                          child: Text("Message: " + onemsg.text,
+                                              style: const TextStyle(
+                                                  fontSize: 17)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
                   //position text field at bottom of screen
-                  bottom: 0, left: 0, right: 0,
+                  // bottom: 0, left: 0, right: 0,
                   child: Container(
                     color: Colors.black12,
                     height: 70,
@@ -215,7 +285,13 @@ class _ChatPageState extends State<ChatPage> {
                             child: Container(
                           margin: const EdgeInsets.all(10),
                           child: TextField(
-                            onSubmitted: (value) => sendmsg(value, myId, "txt"),
+                            autofocus: true,
+                            focusNode: myFocusNode,
+                            onSubmitted: (value) {
+                              sendmsg(value, myId, "txt");
+                              msgtext.clear();
+                              myFocusNode.requestFocus();
+                            },
                             controller: msgtext,
                             decoration: const InputDecoration(
                                 hintText: "Enter your Message"),
