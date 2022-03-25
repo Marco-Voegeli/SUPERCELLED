@@ -9,20 +9,22 @@ from openapi_test2 import get_emotions
 from urllib import parse, request
 import random
 
+GOOD_EMOTIONS = ['happy', 'friendly', 'flattered', 'admirative', 'amused', 'caring',
+                 'desiring', 'excited', 'grateful', 'joyful', 'loved', 'optimist', 'proud', 'relieved']
+
+BAD_EMOTIONS = ['insulted', 'embarrassed', 'sad', 'angry', 'disrepected', 'ashamed', 'shaken', 'unsafe', 'bullied',
+                'unconfortable', 'angry', 'annoyed', 'disappointed', 'disapproved', 'disgusted', 'afraid', 'griving', 'nervous', 'remorse', 'sad']
+NEUTRAL_EMOTIONS = ['confused', 'curious', 'realized', 'suprised']
+GIPHY_API_KEY = 'pui3355ayqU0UNdFY4Yt6IDiNOrgk2tn'
+GIPHY_URL = "http://api.giphy.com/v1/gifs/search"
+
+
 users = {
     '0': 'A',
     '1': 'B'
 }
-
 clients = dict()
 msgs = []
-good_emotions = ['happy', 'friendly', 'flattered', 'admirative', 'amused', 'caring',
-                 'desiring', 'excited', 'grateful', 'joyful', 'loved', 'optimist', 'proud', 'relieved']
-bad_emotions = ['insulted', 'embarrassed', 'sad', 'angry', 'disrepected', 'ashamed', 'shaken', 'unsafe', 'bullied',
-                'unconfortable', 'angry', 'annoyed', 'disappointed', 'disapproved', 'disgusted', 'afraid', 'griving', 'nervous', 'remorse', 'sad']
-neutral_emotions = ['confused', 'curious', 'realized', 'suprised']
-GIPHY_API_KEY = 'pui3355ayqU0UNdFY4Yt6IDiNOrgk2tn'
-GIPHY_URL = "http://api.giphy.com/v1/gifs/search"
 
 
 async def error(websocket, message):
@@ -66,10 +68,9 @@ async def handler(websocket):
 
             except websockets.ConnectionClosedOK:
                 print("User " + users[str(id)] + " disconnected")
-                clients[str(id)].close()
+                clients[id].close()
                 clients.pop(id)
                 break
-
 
 async def send_msgs():
     for id in clients:
@@ -99,21 +100,16 @@ def get_GIF_url(feeling):
     params = parse.urlencode({
     "q": feeling,
     "api_key": GIPHY_API_KEY,
-    "limit": "1"
+    "limit": "10"
     })
 
     with request.urlopen("".join((GIPHY_URL, "?", params))) as response:
         data = json.loads(response.read())
 
-    #coucou = json.dumps(data, sort_keys=True, indent=4)
     rdm_gif = random.randint(0, 9)
-    coucou = data['data']
-    first = coucou[rdm_gif]
-    id = first['id']
+    id = data['data'][rdm_gif]['id']
     url = 'https://i.giphy.com/media/' + id +'/giphy.webp'
-    print(f'url : {url}')
     return url
-
 
 def compute_emotions():
     # msg = text, userid, timestamp
@@ -123,7 +119,6 @@ def compute_emotions():
         conversation += tmp
 
     return get_emotions(conversation)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
