@@ -71,12 +71,12 @@ async def send_msgs():
         await clients[id].send(json.dumps({"msgs" : msgs }))
     for id in clients :
         raw_data = compute_emotions()
-        a_feeling = raw_data[0].split()[-1]
-        b_feeling = raw_data[0].split()[-1]
+        raw_data_json = json.loads(raw_data)
+        a_feeling = raw_data_json["A"].split()[-1]
+        b_feeling = raw_data_json["B"].split()[-1]
         a_gif_url = get_GIF_url(a_feeling)
         b_gif_url = get_GIF_url(b_feeling)
         await clients[id].send(json.dumps({"emotions": raw_data, "A_gif_url": a_gif_url, "B_gif_url": b_gif_url}))
-
 
 async def main():
     async with websockets.serve(handler, "0.0.0.0", 8002):
