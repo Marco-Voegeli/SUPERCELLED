@@ -55,6 +55,7 @@ class _ChatPageState extends State<ChatPage> {
   late FocusNode myFocusNode;
   bool waitingForModel = true;
   String rawModelData = "";
+  String gif_url = "";
 
   @override
   void initState() {
@@ -98,9 +99,9 @@ class _ChatPageState extends State<ChatPage> {
                 print("Received emotions: " + jsondata["emotions"].toString());
                 rawModelData = jsondata["emotions"].toString();
                 waitingForModel = false;
-                String tmp =
-                    json.decode(jsondata["emotions"])[other_equi[myId]];
+                String tmp = jsondata["emotions"][myId == "0" ? 1 : 0];
                 otherUserEmotion = tmp.split(" ").last;
+                gif_url = jsondata[(myId == "0" ? "B" : "A") + "_gif_url"];
                 setState(() {});
               }
             }
@@ -179,65 +180,70 @@ class _ChatPageState extends State<ChatPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(bottom: 20),
-                                  child: Text(
-                                    "Raw data of the assistant :",
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold),
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(bottom: 20),
+                                    child: Text(
+                                      "Raw data of the assistant :",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ),
-                                waitingForModel
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: SizedBox(
-                                          width: 80,
-                                          height: 80,
-                                          child: LoadingIndicator(
-                                            indicatorType: Indicator
-                                                .ballTrianglePathColoredFilled,
-                                            colors: _kDefaultRainbowColors,
-                                            strokeWidth: 4.0,
+                                  waitingForModel
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: SizedBox(
+                                            width: 80,
+                                            height: 80,
+                                            child: LoadingIndicator(
+                                              indicatorType: Indicator
+                                                  .ballTrianglePathColoredFilled,
+                                              colors: _kDefaultRainbowColors,
+                                              strokeWidth: 4.0,
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                    : Text(rawModelData)
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: const BoxDecoration(
-                                      color: Colors.blue,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(50))),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                Text("User " +
-                                    (other_equi[myId] ?? "undef") +
-                                    " is feeling " +
-                                    otherUserEmotion),
-                              ],
-                            ),
-                          ],
+                                        )
+                                      : Text(rawModelData)
+                                ],
+                              ),
+                              Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  gif_url != ""
+                                      ? Container(
+                                          width: size.width * 0.2,
+                                          child: Image.network(gif_url))
+                                      : const SizedBox.shrink(),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  Text("User " +
+                                      (other_equi[myId] ?? "undef") +
+                                      " is feeling " +
+                                      otherUserEmotion),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         const Divider(
                           color: Colors.grey,
                           thickness: 2,
                         ),
                         Expanded(
+                          flex: 3,
                           child: ListView.builder(
                             shrinkWrap: true,
                             controller: _scrollController,
@@ -264,6 +270,9 @@ class _ChatPageState extends State<ChatPage> {
                                       : size.width * 0.4, //else margin at right
                                 ),
                                 child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
                                   color:
                                       isMe ? Colors.blue[100] : Colors.red[100],
                                   //if its my message then, blue background else red background
