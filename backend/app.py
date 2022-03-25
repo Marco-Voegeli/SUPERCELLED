@@ -70,9 +70,9 @@ async def send_msgs():
     for id in clients :
         await clients[id].send(json.dumps({"msgs" : msgs }))
     for id in clients :
-        raw_data = compute_emotions()
-        a_feeling = raw_data[0].split()[-1]
-        b_feeling = raw_data[0].split()[-1]
+        raw_data = json.loads(compute_emotions())
+        a_feeling = raw_data["A"].split()[-1]
+        b_feeling = raw_data["B"].split()[-1]
         a_gif_url = get_GIF_url(a_feeling)
         b_gif_url = get_GIF_url(b_feeling)
         await clients[id].send(json.dumps({"emotions": raw_data, "A_gif_url": a_gif_url, "B_gif_url": b_gif_url}))
