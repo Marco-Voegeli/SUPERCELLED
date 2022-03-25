@@ -18,7 +18,6 @@ NEUTRAL_EMOTIONS = ['confused', 'curious', 'realized', 'suprised']
 GIPHY_API_KEY = 'pui3355ayqU0UNdFY4Yt6IDiNOrgk2tn'
 GIPHY_URL = "http://api.giphy.com/v1/gifs/search"
 
-
 users = {
     '0': 'A',
     '1': 'B'
@@ -77,7 +76,8 @@ async def send_msgs():
         await clients[id].send(json.dumps({"msgs": msgs}))
     for id in clients:
         raw_data = compute_emotions()
-
+        raw_data = [s[1:] for s in raw_data]
+        print(f'raw_data : {raw_data}')
         a_feeling = raw_data[0].split()[-1]
         b_feeling = raw_data[1].split()[-1]
         a_gif_url = get_GIF_url(a_feeling)
