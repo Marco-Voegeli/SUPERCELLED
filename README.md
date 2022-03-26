@@ -1,4 +1,4 @@
-# SUPERCELLED
+# STARTHACK - SUPERCELL CASE
 
 Bringing non verbal communication to the virtual world
 
@@ -18,8 +18,12 @@ The assistant that processes anonymously each message, inferring what the users 
 
 # Usage
 
-from frontend directory, launch flutter with 
-`flutter run -d chrome`
+#### You will need to create an API key for openAI to run our backend. [More infos here.](https://beta.openai.com/overview)
 
-from backend directory, launch server with
-`python3 app.py`
+- From frontend directory, launch flutter with `flutter run -d chrome`
+
+- From backend directory, launch server with `python3 app.py`
+
+
+# Results
+
