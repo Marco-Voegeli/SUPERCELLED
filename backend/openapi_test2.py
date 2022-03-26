@@ -1,6 +1,6 @@
 import os
 import csv
-
+from config import openAI_API_key
 from click import prompt
 import openai
 
@@ -129,10 +129,6 @@ class Conversation:
 
 
 def get_emotions(conversation: str):
-    openAI_API_key = ""
-    with open('openAI_API_key.txt') as f:
-        openAI_API_key = f.readline()
-    f.close()
     openai.api_key = openAI_API_key
 
     c = Conversation()
