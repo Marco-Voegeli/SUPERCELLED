@@ -24,6 +24,7 @@ The assistant that processes anonymously each message, inferring what the users 
 ## Usage
 
 ##### You will need to create an API key for openAI to run our backend. [More infos here.](https://beta.openai.com/overview)
+- In backend directory, create a file `config.py` and add a variable `openAI_API_key = "YOUR OPENAI API KEY"`
 
 #### Local
 
