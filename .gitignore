@@ -1,5 +1,2 @@
-
-
-# coucou 
 backend/__pycache__/
-backend/openAI_API_key.txt
+backend/config.py
